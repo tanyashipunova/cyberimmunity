@@ -1,0 +1,65 @@
+'https://www.plantuml.com/plantuml/png/dLVBRjjM4DtpAoxIXHU1agRl2aMH_sYwO6N55M2J0aaRw4wItJg5NAW1kYWA54PHeEiRMNHeFUXVcFj7FJFa3IyVheh0i25UdZbpvZ5pvUTnuaV9wScnbuoIuw6YFocb6z9cHXajQMVcTAVCrFo4unsE9vJXuDaJ-XK8JMlIYi_L8nXg66Hi37Hc5eyyppzDmk3qvBjXvFc398m0koODkYd0jm1D7Ya_LcC_ZeV14L1ZY1aDHcC_I83zYp9WPt2z9VqYCETqRoRYPYDou4JHlQXQKqvR8JiSnMC_6NpVP7lsH85mQHRqrbm9SX06GHtpYM0qtEMqGYmQqUme5n4P1rjwy8_gTX_3xX-MP6OYS6Ek95iBY9xk3w9GCmoIo3-k4tyaWk0OmDHCNWJqXZ8EbL9nbL4cnl70RuJoAIp_eBoKbBCaMAyebwTR3Wk5n9yteaxBmPBM9M4K-eTrmYz0sAunOmF_J7qG3Hlupu3_knahfH1npw5GAa7yRC_BwY45GVooLRiFGNOjyIwvD6PUH3sCpiAu3lqSoDyHzOL4kkKUay2quzxjG7ahRAFWPPZue-04XTZJY1Ec055ERxdEbfxhJHcIYbSRdg5IvzZ_WKbZxw16-wKj4VSQvvC_DmNRJZqS9QCm60L7ddSKXQTZnUvXU8CuPs8WixWkpbC8M-4azRXPLUzhsrvzLLbqe4kK660wzg410TGPkJq65T3niEK1Dg_mUsvcmkdeVVouXR0Ql_g6c-xR7lSVGDW0KdAUsrsH_0hQauRkT_Mxhe8k29rS5OKsb-QrcQcklZKBDsMsUKNqYaVKxW8pfzIkAcsdrymVu6JZN67KDuZb5WPtvXMbCgxDOVM6mQ6IXh1jqJbTmjXbZjnLSLlz3sIJK-Y6-K0wxMj0omdjg_RMWoO7wP9sHu39wauANhJ2SfYhLkhrc9kN24JFcKOwj6cSEYbzUg3eDzAYEIryvyolqD6wk7Fm8tlVdLikx5B9dRan2_EZChy8U2S66Tjda29ScgcKkP3it5WsFfegpdlfvuuPURBCfVHLwcm1sMKhvkhHqiohHzMrwsp3kkMHaLrpHyB15JVBKcgGUGN2JMFVULqtd7llBdAGovs4IR0IjupbkeeBMG_bA62iFGPRepvYB--yzlRUyAhi2arR3hVUpUlIBDehhetXyaXNv9I9xgbebkQnwqpRJVLkkoFMz-Qo72uVs3AyjDrrWQUrlNSxhZ7Tk7j8F-oaZ5qov60gwqjsAn6wfT-3hXBhNgN_RUGY9NZRGVjzDNiOS_H_UnY1Eu2wwToP_uEdNX0cGnMU3IDhMtpLeMiHXvK4LRVkcbtoUdA_dkQD2yoSeo7QUmUpKAvpTcd76yf49gmh9-wbchtFVUZKlwwjvj2yfbtd7R_7nadWStp4FnV_0W00
+
+@startuml
+title Негативный сценарий 1.Атака на "Навигация"
+
+autonumber
+actor "Пассажир" as passenger
+participant "Система\nуправления парком" as dispatcher
+participant "1. Связь" as conn
+participant "4. Самодиагностика" as diag
+participant "3. Центральная\nсистема\nуправления" as central
+participant "2. Сканер\nбиометрии" as scan
+participant "5. Контроль\nдорожной обстановки" as road
+participant "8. Навигация" as nav #red
+participant "6. Управление\nперемещением" as transfer
+participant "10. Приводы" as servos
+participant "7. Информирование\nпассажиров" as infotainment
+participant "Система\nраспознавания\nи оплаты" as payments
+'participant "9. Кондиционирование" as conditioning
+
+group подготовка к поездке
+diag -> central: готов к поездке
+central -> conn: готов к поездке
+conn -> dispatcher: готов к поездке
+dispatcher -> conn: маршрут
+conn -> central++: маршрут
+central <[#red]- nav: координаты
+central <- road: обстановка
+central -[#red]> central: расчёт перемещения
+central -> transfer++: детальные параметры перемещения до ближайшей остановки
+end group
+group перемещение до остановки
+nav -[#red]> transfer: координаты
+road -> transfer: обстановка
+transfer -> servos: управление 
+transfer -> transfer: перемещение\nдо ближайшей\nостановки
+transfer --> central--: прибыли к остановке
+end group
+/' Далее блоки закомментированы в целях экономии и показа фрагмента с атакой в отчете
+group посадка-высадка пассажиров
+central -> servos: открыть двери
+servos --> central: двери открыты
+passenger -> scan++: посмотреть в камеру
+scan -> scan: сканирование\nлица пассажира
+scan -> central--: биометрия
+central -> conn: биометрия и стоимость проезда
+conn -> payments++: биометрия и стоимость проезда
+payments -> payments: идентификация\nпассажира\nи оплата проезда
+payments --> conn--: проезд оплачен
+conn --> central: проезд оплачен
+central -> infotainment: проезд оплачен
+infotainment -> passenger: проезд оплачен
+central -> servos: закрыть двери
+servos --> central--: двери закрыты
+end group
+'/
+note over central #red
+Продолжение движения по маршруту с остановками
+end note
+group завершение поездки
+central <[#red]- nav: координаты
+central -> conn--: маршрут завершён
+conn -> dispatcher: маршрут завершён
+end group
+@enduml
